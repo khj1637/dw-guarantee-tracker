@@ -68,14 +68,20 @@ for i, item in enumerate(st.session_state.guarantee_list):
 
 df = pd.DataFrame(table_data)
 
-# 페이지네이션
+# 페이지네이션 (안전하게)
 page_size = 10
 total = len(df)
-page_num = st.number_input("페이지 번호", min_value=1, max_value=(total - 1)//page_size + 1, step=1)
-start_idx = (page_num - 1) * page_size
-end_idx = start_idx + page_size
 
-st.dataframe(df.iloc[start_idx:end_idx])
+if total > 0:
+    max_page = (total - 1) // page_size + 1
+    page_num = st.number_input("페이지 번호", min_value=1, max_value=max_page, step=1)
+    
+    start_idx = (page_num - 1) * page_size
+    end_idx = start_idx + page_size
+
+    st.dataframe(df.iloc[start_idx:end_idx])
+else:
+    st.info("등록된 보증서가 없습니다.")
 
 # 삭제 기능 (간단 구현)
 delete_index = st.number_input("삭제할 No 입력 (선택사항)", min_value=0, max_value=total, step=1)
