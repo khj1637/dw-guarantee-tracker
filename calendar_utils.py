@@ -33,8 +33,8 @@ def register_calendar_event(guarantee_data: dict):
     event = {
         "summary": title,
         "description": description,
-        "start": {"date": end_date},
-        "end": {"date": end_date},
+        "start": {"date": end_date.strftime("%Y-%m-%d")},
+        "end": {"date": end_date_plus_one.strftime("%Y-%m-%d")},
         "reminders": {
             "useDefault": False,
             "overrides": [
