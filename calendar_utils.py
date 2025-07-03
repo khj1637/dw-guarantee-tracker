@@ -1,11 +1,11 @@
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # 환경 설정
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
 SERVICE_ACCOUNT_FILE = "credentials.json"
-CALENDAR_ID = "primary"  # or 실제 공유받은 캘린더 ID
+CALENDAR_ID = "primary"  # 또는 공유 캘린더 ID
 
 # 캘린더 API 클라이언트 생성
 def get_calendar_service():
@@ -19,6 +19,7 @@ def get_calendar_service():
 def register_calendar_event(guarantee_data: dict):
     service = get_calendar_service()
 
+    # 일정 제목 및 설명
     title = f"[보증종료] {guarantee_data['현장명']} - {guarantee_data['항목']}"
     description = (
         f"보증종류: {guarantee_data['증권종류']}\n"
@@ -28,13 +29,21 @@ def register_calendar_event(guarantee_data: dict):
         f"비고: {guarantee_data['특기사항']}"
     )
 
-    end_date = guarantee_data["보증기간"]["종료일"]  # YYYY-MM-DD
+    # 종료일 변환 (문자열 → 날짜 객체)
+    end_date_str = guarantee_data["보증기간"]["종료일"]  # 예: "2025-09-30"
+    end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+    end_date_plus_one = end_date + timedelta(days=1)
 
+    # ISO 8601 형식으로 변환
+    start_date_formatted = end_date.strftime("%Y-%m-%d")
+    end_date_formatted = end_date_plus_one.strftime("%Y-%m-%d")
+
+    # 이벤트 생성
     event = {
         "summary": title,
         "description": description,
-        "start": {"date": end_date.strftime("%Y-%m-%d")},
-        "end": {"date": end_date_plus_one.strftime("%Y-%m-%d")},
+        "start": {"date": start_date_formatted},
+        "end": {"date": end_date_formatted},
         "reminders": {
             "useDefault": False,
             "overrides": [
